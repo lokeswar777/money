@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Overview</title>
+    <style>
+        :root {
+            --primary: #3ecf8e;
+            --bg: #f4f4f5;
+            --card: #ffffff;
+            --text: #1f2937;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding-top: 50px;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--card);
+            width: 500px;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 { margin: 0; font-size: 1.5rem; }
+        
+        a { color: var(--primary); text-decoration: none; font-weight: bold; }
+        a:hover { text-decoration: underline; }
+
+        .section { margin-bottom: 2rem; }
+        .section h2 { font-size: 1.1rem; border-bottom: 2px solid #eee; padding-bottom: 0.5rem; margin-bottom: 1rem; }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #f9f9f9;
+        }
+        .stat-row:last-child { border-bottom: none; }
+        .stat-val { font-weight: bold; }
+        
+        .loading { text-align: center; color: #888; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header">
+            <h1>Overview</h1>
+            <a href="index.html">&larr; Back to Add</a>
+        </div>
+
+        <div class="section" style="text-align: center;">
+            <input type="month" id="monthFilter" style="padding: 8px; border-radius: 6px; border: 1px solid #ddd;">
+        </div>
+
+        <div id="content">
+            <p class="loading">Calculating statistics...</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+        import { SUPABASE_URL, SUPABASE_KEY } from './config.js'
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+        const contentDiv = document.getElementById('content')
+        const monthFilter = document.getElementById('monthFilter')
+
+        // Set default to current month
+        const now = new Date()
+        const currentMonth = now.toISOString().slice(0, 7) // YYYY-MM
+        monthFilter.value = currentMonth
+
+        monthFilter.addEventListener('change', () => loadOverview(monthFilter.value))
+
+        async function loadOverview(selectedMonth) {
+            contentDiv.innerHTML = '<p class="loading">Calculating statistics...</p>'
+
+            // Calculate start and end of selected month
+            const [year, month] = selectedMonth.split('-')
+            const startDate = new Date(year, month - 1, 1).toISOString()
+            const endDate = new Date(year, month, 0, 23, 59, 59).toISOString()
+
+            // Fetch all expenses
+            const { data: expenses, error } = await supabase
+                .from('expenses')
+                .select('*')
+                .gte('created_at', startDate)
+                .lte('created_at', endDate)
+                .order('created_at', { ascending: false })
+
+            if (error) {
+                contentDiv.innerHTML = `<p style="color:red">Error: ${error.message}</p>`
+                return
+            }
+
+            if (!expenses.length) {
+                contentDiv.innerHTML = `<p style="text-align:center">No expenses found for this month.</p>`
+                return
+            }
+
+            // 1. Calculate Totals by Category
+            const categoryTotals = {}
+            // 2. Calculate Totals by Month
+            const monthTotals = {}
+
+            expenses.forEach(item => {
+                const amount = parseFloat(item.amount)
+                
+                // Category Logic
+                const cat = item.category || 'Uncategorized'
+                categoryTotals[cat] = (categoryTotals[cat] || 0) + amount
+
+                // Month Logic (using created_at)
+                const date = new Date(item.created_at)
+                const monthKey = date.toLocaleString('default', { month: 'long', year: 'numeric' }) // e.g. "January 2024"
+                monthTotals[monthKey] = (monthTotals[monthKey] || 0) + amount
+            })
+
+            renderStats(categoryTotals, monthTotals)
+        }
+
+        function renderStats(byCategory, byMonth) {
+            let html = ''
+
+            // Render Month Section
+            html += `<div class="section"><h2>Total by Month</h2>`
+            for (const [month, total] of Object.entries(byMonth)) {
+                html += `
+                    <div class="stat-row">
+                        <span>${month}</span>
+                        <span class="stat-val">₹${total.toFixed(2)}</span>
+                    </div>`
+            }
+            html += `</div>`
+
+            // Render Category Section
+            html += `<div class="section"><h2>Total by Category</h2>`
+            for (const [cat, total] of Object.entries(byCategory)) {
+                html += `
+                    <div class="stat-row">
+                        <span>${cat}</span>
+                        <span class="stat-val">₹${total.toFixed(2)}</span>
+                    </div>`
+            }
+            html += `</div>`
+
+            contentDiv.innerHTML = html
+        }
+
+        loadOverview(monthFilter.value)
+    </script>
+</body>
+</html>

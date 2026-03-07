@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <style>
+        :root {
+            --primary: #3ecf8e; /* Supabase Green */
+            --bg: #f4f4f5;
+            --card: #ffffff;
+            --text: #1f2937;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            display: flex;
+            justify-content: center;
+            padding-top: 50px;
+            margin: 0;
+        }
+
+        .container {
+            background-color: var(--card);
+            width: 400px;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 { text-align: center; margin-bottom: 1.5rem; }
+
+        .header-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 1rem;
+        }
+
+        .btn-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        .btn-link:hover { text-decoration: underline; }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+
+        input {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 100%;
+            font-size: 14px;
+        }
+
+        select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            width: 100%;
+            font-size: 14px;
+            background: white;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: opacity 0.2s;
+        }
+
+        button:hover { opacity: 0.9; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        ul { list-style: none; padding: 0; margin-top: 20px; }
+
+        li {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+
+        li:last-child { border-bottom: none; }
+        .amount { font-weight: bold; color: var(--primary); }
+        .category-tag { font-size: 0.8rem; color: #666; background: #eee; padding: 2px 6px; border-radius: 4px; margin-right: 8px; }
+        .loading { text-align: center; color: #888; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="header-actions">
+            <a href="overview.html" class="btn-link">View Overview &rarr;</a>
+        </div>
+        <h1>Expense Tracker</h1>
+        
+        <!-- Input Form -->
+        <form id="expenseForm">
+            <div class="input-group">
+                <select id="category" required>
+                    <option value="" disabled selected>Select Category</option>
+                    <option value="Food (Breakfast)">Food (Breakfast)</option>
+                    <option value="Food (Lunch)">Food (Lunch)</option>
+                    <option value="Food (Dinner)">Food (Dinner)</option>
+                    <option value="Drinks and Snacks">Drinks and Snacks</option>
+                    <option value="Needs">Needs</option>
+                    <option value="Shopping">Shopping</option>
+                    <option value="Others">Others</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <input type="text" id="description" placeholder="Expense name (e.g. Coffee)" required>
+            </div>
+            <div class="input-group">
+                <input type="number" id="amount" placeholder="Amount" step="0.01" required>
+                <button type="submit" id="addBtn">Add</button>
+            </div>
+        </form>
+
+        <!-- List Display -->
+        <ul id="expenseList">
+            <li class="loading">Loading expenses...</li>
+        </ul>
+        <div style="text-align: center; margin-top: 20px;">
+            <a href="transactions.html" class="btn-link">View All Transactions</a>
+        </div>
+    </div>
+
+    <!-- Logic -->
+    <script type="module">
+        // Import Supabase from CDN
+        import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+        import { SUPABASE_URL, SUPABASE_KEY } from './config.js'
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
+
+        const form = document.getElementById('expenseForm')
+        const list = document.getElementById('expenseList')
+        const addBtn = document.getElementById('addBtn')
+
+        // 1. Function to fetch and display expenses
+        async function fetchExpenses() {
+            const { data, error } = await supabase
+                .from('expenses')
+                .select('*')
+                .order('created_at', { ascending: false })
+                .limit(5)
+
+            if (error) {
+                console.error('Error fetching:', error)
+                list.innerHTML = '<li style="color:red">Error loading data</li>'
+                return
+            }
+
+            renderList(data)
+        }
+
+        // 2. Function to render HTML list
+        function renderList(expenses) {
+            list.innerHTML = '' // Clear current list
+            
+            if (expenses.length === 0) {
+                list.innerHTML = '<li class="loading">No expenses yet.</li>'
+                return
+            }
+
+            expenses.forEach(expense => {
+                const li = document.createElement('li')
+                li.innerHTML = `
+                    <span>
+                        <span class="category-tag">${expense.category || 'Other'}</span>
+                        ${expense.description}
+                    </span>
+                    <span class="amount">₹${parseFloat(expense.amount).toFixed(2)}</span>
+                `
+                list.appendChild(li)
+            })
+        }
+
+        // 3. Handle Form Submit (Add Expense)
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault()
+            
+            const description = document.getElementById('description').value
+            const amount = document.getElementById('amount').value
+            const category = document.getElementById('category').value
+
+            // Disable button while processing
+            addBtn.disabled = true
+            addBtn.textContent = 'Adding...'
+
+            const { data, error } = await supabase
+                .from('expenses')
+                .insert([{ description, amount, category }])
+                .select()
+
+            if (error) {
+                console.error('Error inserting:', error)
+                alert('Failed to add expense')
+            } else {
+                // Clear form and refresh list
+                form.reset()
+                fetchExpenses() 
+            }
+
+            addBtn.disabled = false
+            addBtn.textContent = 'Add'
+        })
+
+        // Initial Load
+        fetchExpenses()
+
+    </script>
+</body>
+</html>
