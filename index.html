@@ -11,6 +11,24 @@
             --bg: #f4f4f5;
             --card: #ffffff;
             --text: #1f2937;
+            --border: #ddd;
+            --input-bg: #ffffff;
+            --tag-bg: #eee;
+            --tag-text: #666;
+            --muted: #888;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #18181b;
+                --card: #27272a;
+                --text: #f4f4f5;
+                --border: #3f3f46;
+                --input-bg: #27272a;
+                --tag-bg: #3f3f46;
+                --tag-text: #d4d4d8;
+                --muted: #a1a1aa;
+            }
         }
 
         body {
@@ -55,19 +73,22 @@
 
         input {
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border);
             border-radius: 6px;
             width: 100%;
             font-size: 14px;
+            background: var(--input-bg);
+            color: var(--text);
         }
 
         select {
             padding: 10px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border);
             border-radius: 6px;
             width: 100%;
             font-size: 14px;
-            background: white;
+            background: var(--input-bg);
+            color: var(--text);
         }
 
         button {
@@ -90,13 +111,13 @@
             display: flex;
             justify-content: space-between;
             padding: 12px;
-            border-bottom: 1px solid #eee;
+            border-bottom: 1px solid var(--border);
         }
 
         li:last-child { border-bottom: none; }
         .amount { font-weight: bold; color: var(--primary); }
-        .category-tag { font-size: 0.8rem; color: #666; background: #eee; padding: 2px 6px; border-radius: 4px; margin-right: 8px; }
-        .loading { text-align: center; color: #888; }
+        .category-tag { font-size: 0.8rem; color: var(--tag-text); background: var(--tag-bg); padding: 2px 6px; border-radius: 4px; margin-right: 8px; }
+        .loading { text-align: center; color: var(--muted); }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -110,7 +131,7 @@
             top: 10px;
             right: 15px;
             font-size: 0.9rem;
-            color: #999;
+            color: var(--muted);
             font-weight: 500;
         }
     </style>

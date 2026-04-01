@@ -11,6 +11,27 @@
             --bg: #f4f4f5;
             --card: #ffffff;
             --text: #1f2937;
+            --border: #ddd;
+            --border-light: #eee;
+            --input-bg: #ffffff;
+            --tag-bg: #eee;
+            --tag-text: #666;
+            --muted: #888;
+            --dialog-bg: #ffffff;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #18181b;
+                --card: #27272a;
+                --text: #f4f4f5;
+                --border: #3f3f46;
+                --border-light: #3f3f46;
+                --input-bg: #18181b;
+                --tag-bg: #3f3f46;
+                --tag-text: #d4d4d8;
+                --muted: #a1a1aa;
+                --dialog-bg: #27272a;
+            }
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -34,32 +55,32 @@
         a:hover { text-decoration: underline; }
         
         .filter-section { margin-bottom: 1.5rem; text-align: center; }
-        input[type="month"] { padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; }
+        input[type="month"] { padding: 8px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem; background: var(--input-bg); color: var(--text); }
 
         ul { list-style: none; padding: 0; }
-        li { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid #eee; }
+        li { display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid var(--border-light); }
         li:last-child { border-bottom: none; }
         .amount { font-weight: bold; color: var(--primary); }
-        .category-tag { font-size: 0.8rem; color: #666; background: #eee; padding: 2px 6px; border-radius: 4px; margin-right: 8px; }
-        .date-small { display: block; font-size: 0.75rem; color: #999; margin-top: 2px; }
-        .loading { text-align: center; color: #888; display: block; }
+        .category-tag { font-size: 0.8rem; color: var(--tag-text); background: var(--tag-bg); padding: 2px 6px; border-radius: 4px; margin-right: 8px; }
+        .date-small { display: block; font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
+        .loading { text-align: center; color: var(--muted); display: block; }
 
         .actions { display: flex; align-items: center; gap: 10px; }
-        .btn-small { padding: 5px 10px; font-size: 0.8rem; cursor: pointer; border-radius: 4px; border: 1px solid #ddd; background: white; }
-        .edit-btn { color: #2563eb; border-color: #bfdbfe; }
-        .edit-btn:hover { background: #eff6ff; }
-        .delete-btn { color: #dc2626; border-color: #fecaca; }
-        .delete-btn:hover { background: #fef2f2; }
+        .btn-small { padding: 5px 10px; font-size: 0.8rem; cursor: pointer; border-radius: 4px; border: 1px solid var(--border); background: var(--input-bg); transition: all 0.2s; }
+        .edit-btn { color: #3b82f6; border-color: #3b82f6; }
+        .edit-btn:hover { background: #3b82f6; color: white; }
+        .delete-btn { color: #ef4444; border-color: #ef4444; }
+        .delete-btn:hover { background: #ef4444; color: white; }
 
         /* Dialog Styles */
-        dialog { border: none; border-radius: 12px; padding: 20px; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        dialog { border: none; border-radius: 12px; padding: 20px; width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.5); background: var(--dialog-bg); color: var(--text); }
         dialog::backdrop { background: rgba(0,0,0,0.5); }
         .dialog-title { margin-top: 0; margin-bottom: 15px; font-size: 1.2rem; }
         .form-group { margin-bottom: 12px; }
-        .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: #555; }
-        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--text); }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; background: var(--input-bg); color: var(--text); }
         .dialog-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-        .btn-cancel { background: #f4f4f5; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
+        .btn-cancel { background: var(--tag-bg); color: var(--text); border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; }
         .btn-save { background: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
         @keyframes fadeIn {
@@ -75,7 +96,7 @@
             top: 10px;
             right: 15px;
             font-size: 0.9rem;
-            color: #999;
+            color: var(--muted);
             font-weight: 500;
         }
     </style>
