@@ -6,6 +6,7 @@
     <title>Expense Overview</title>
     <link rel="icon" type="image/png" href="money.png">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
         :root {
             --primary: #3ecf8e;
@@ -252,6 +253,8 @@
             const isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
             Chart.defaults.color = isDark ? '#a1a1aa' : '#666';
 
+            Chart.register(ChartDataLabels);
+
             myChart = new Chart(ctx, {
                 type: 'pie',
                 data: {
@@ -265,8 +268,31 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 30,
+                            right: 30,
+                            bottom: 50,
+                            left: 30
+                        }
+                    },
                     plugins: {
-                        legend: { position: 'bottom' }
+                        legend: { 
+                            position: 'bottom',
+                            labels: { padding: 30 }
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'end',
+                            color: isDark ? '#a1a1aa' : '#1f2937',
+                            font: { weight: 'bold' },
+                            formatter: (value, context) => {
+                                const dataArr = context.chart.data.datasets[0].data;
+                                const total = dataArr.reduce((acc, curr) => acc + curr, 0);
+                                const percentage = ((value * 100) / total).toFixed(1) + '%';
+                                return percentage;
+                            }
+                        }
                     }
                 }
             });
