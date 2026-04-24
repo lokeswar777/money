@@ -134,12 +134,31 @@
             color: var(--muted);
             font-weight: 500;
         }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: bold;
+            transition: all 0.2s;
+            margin-right: 15px;
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: white;
+        }
     </style>
 </head>
 <body>
     <div class="top-right-name">Lokeswar</div>
     <div class="container">
         <div class="header-actions">
+            <button id="notifyBtn" class="btn-outline">🔔 Enable Reminders</button>
             <a href="overview.html" class="btn-link">View Overview &rarr;</a>
         </div>
         <h1>Expense Tracker</h1>
@@ -187,6 +206,7 @@
         const form = document.getElementById('expenseForm')
         const list = document.getElementById('expenseList')
         const addBtn = document.getElementById('addBtn')
+        const notifyBtn = document.getElementById('notifyBtn')
 
         // 1. Function to fetch and display expenses
         async function fetchExpenses() {
@@ -256,6 +276,18 @@
             addBtn.disabled = false
             addBtn.textContent = 'Add'
         })
+
+        // 4. Request Notification Permission
+        notifyBtn.addEventListener('click', async () => {
+            if (!('Notification' in window)) {
+                alert('This browser does not support desktop notifications');
+                return;
+            }
+            const permission = await Notification.requestPermission();
+            if (permission === 'granted') {
+                alert('Notifications enabled! Note: Backend Web Push integration is required for offline delivery.');
+            }
+        });
 
         // Initial Load
         fetchExpenses()
