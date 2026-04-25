@@ -200,6 +200,7 @@
         // Import Supabase from CDN
         import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
         import { SUPABASE_URL, SUPABASE_KEY } from './config.js'
+        import { setupPushNotifications } from './main.js'
 
         const supabase = createClient(SUPABASE_URL, SUPABASE_KEY)
 
@@ -283,9 +284,14 @@
                 alert('This browser does not support desktop notifications');
                 return;
             }
-            const permission = await Notification.requestPermission();
-            if (permission === 'granted') {
-                alert('Notifications enabled! Note: Backend Web Push integration is required for offline delivery.');
+            
+            notifyBtn.disabled = true;
+            notifyBtn.textContent = 'Enabling...';
+            
+            await setupPushNotifications();
+            
+            if (Notification.permission === 'granted') {
+                notifyBtn.textContent = '🔔 Notifications Enabled';
             }
         });
 
